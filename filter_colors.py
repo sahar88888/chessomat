@@ -6,6 +6,7 @@ import chess_helper
 from PIL import Image
 import chess
 
+
 BLACK = (0.0, 0.0, 0.0)
 BLACK_NUM = 1
 WHITE_NUM = 2
