@@ -13,6 +13,9 @@ mindensity=0.45
 maxdensity=3.5
 minyahas=0.5
 maxyahas=1
+normalizing_factor_density = (((maxdensity+mindensity)*0.5)**2/2)+(
+    maxdensity*mindensity*(-0.5)+0.2)
+normalizing_factor_yahas = (((maxyahas+minyahas)**2)/4)+(0.9-maxyahas*minyahas)
 parameterOfSize=0.45 ##the minimal size of white that should be in an image
 #if its lower than that, we cancel the image
 
@@ -210,7 +213,8 @@ class find_move:
         density = numofWhite * 1.0 / numOfBlack
         if (density < mindensity or density > maxdensity):
             return 0
-        return -0.5 * (density - mindensity) * (density - maxdensity) + 0.2
+        return (-0.5 * (density - mindensity) * (density - maxdensity) + 0.2)\
+               /normalizing_factor
 
     # return the X,Y of CM of the color given to the function
     def centerMass(self, img, color):
@@ -272,4 +276,5 @@ class find_move:
         return self.checkDensity(imgOneZero) * yahasmetrics
 
 
-
+def test_find_move():
+    c
