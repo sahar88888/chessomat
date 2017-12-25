@@ -310,5 +310,6 @@ def tester2(main_im_name, im1_name, im2_name, is_my_turn,loc):
     scipy.misc.imsave('square_diff.JPEG', square_diff)
     return
 
+
 #tester('main_im_b.jpg', 'im1_b.jpg', 'im2_b.jpg', True, False)
 tester2('main_im_b.jpg', 'im1_b.jpg', 'im2_b.jpg', True, 'g1')
