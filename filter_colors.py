@@ -127,6 +127,7 @@ class filter_colors:
     gets 2 primary colors from board image.
     """
 
+
     def get_board_colors(self, im):
         ar = np.asarray(im)
         ar_sz = len(ar)
