@@ -5,6 +5,7 @@ import scipy.cluster
 import chess_helper
 from PIL import Image
 import chess
+from scipy import misc
 
 BLACK = (0.0, 0.0, 0.0)
 BLACK_NUM = 1
@@ -12,9 +13,9 @@ WHITE_NUM = 2
 ME_NUM = 4
 HIM_NUM = 8
 BLACK_SHOW = (0.0, 0.0, 0.0)
-WHITE_SHOxW = (1.0, 1.0, 1.0)
-HIM_SHOW = (0.7, 0.7, 1.0)
-ME_SHOW = (0.5, 0.2, 0.2)
+WHITE_SHOW = (1.0, 1.0, 1.0)
+ME_SHOW = (0.6, 0.8, 0.8)
+HIM_SHOW = (0.5, 0.2, 0.2)
 RELEVANT_CHANGES_ME_BLACK = [abs(ME_NUM - BLACK_NUM), abs(ME_NUM - HIM_NUM)]
 RELEVANT_CHANGES_ME_WHITE = [abs(ME_NUM - WHITE_NUM), abs(ME_NUM - HIM_NUM)]
 RELEVANT_CHANGES_HIM_BLACK = [abs(HIM_NUM - BLACK_NUM), abs(HIM_NUM - ME_NUM)]
@@ -78,8 +79,9 @@ class filter_colors:
 
     def get_square_diff(self, im, square_loc):
         is_white = self.chess_helper.square_color(square_loc) == chess.WHITE
-        before_square = self.get_square_image(self.prev_im, square_loc)
-        after_square = self.get_square_image(im, square_loc)
+        before_square = self.get_square_image(self.prev_im, square_loc,
+                                              self.chess_helper.user_starts)
+        after_square = self.get_square_image(im, square_loc,self.chess_helper.user_starts)
         before_square = self.catalogue_colors(before_square,is_white)
         after_square = self.catalogue_colors(after_square,is_white)
         square_diff = self.make_binary_relevant_diff_im(before_square,
@@ -114,11 +116,14 @@ class filter_colors:
     """
 
 
-    def get_square_image(self, im, loc):
+    def get_square_image(self, im, loc,did_I_start):
         locidx = self.chess_helper.ucitoidx(loc)
         sq_sz = len(im[0]) // 8
         x = locidx[0]
-        y = locidx[1]
+        if did_I_start:
+            y = 8 - locidx[1]
+        else:
+            y = locidx[1]
         area = (x * sq_sz, y * sq_sz, (x + 1) * sq_sz, (y + 1) * sq_sz)
         sqr_im = im[area[1]:area[3], area[0]:area[2]]
         return sqr_im
@@ -255,7 +260,7 @@ class filter_colors:
     image.
     """
 
-
+"""
 def tester(main_im_name, im1_name, im2_name, is_white, is_my_turn):
     main_im = scipy.misc.imread(main_im_name)
     im1 = scipy.misc.imread(im1_name)
@@ -277,11 +282,12 @@ def tester(main_im_name, im1_name, im2_name, is_white, is_my_turn):
                                                        is_white)
     scipy.misc.imsave('cat_diff.JPEG', diff_im)
     return
+"""
 
-def tester2(main_im_name, im1_name, im2_name, is_my_turn,loc):
-    main_im = scipy.misc.imread(main_im_name)
-    im1 = scipy.misc.imread(im1_name)
-    im2 = scipy.misc.imread(im2_name)
+def tester(main_im_name, im1_name, im2_name, is_my_turn,loc):
+    main_im = misc.imresize(misc.imread(main_im_name), (600, 600))
+    im1 = misc.imresize(misc.imread(im1_name), (600, 600))
+    im2= misc.imresize(misc.imread(im2_name), (600, 600))
     if is_my_turn:
         chesshelper = chess_helper.chess_helper(chess_helper.chess_helper.ME)
     else:
@@ -289,27 +295,20 @@ def tester2(main_im_name, im1_name, im2_name, is_my_turn,loc):
             chess_helper.chess_helper.RIVAL)
     colorfilter = filter_colors(main_im, chesshelper)
     colorfilter.set_prev_im(im1)
-    im1_square = colorfilter.get_square_image(im1, loc)
-    im2_square = colorfilter.get_square_image(im2, loc)
+    im1_square = colorfilter.get_square_image(im1, loc,is_my_turn)
+    im2_square = colorfilter.get_square_image(im2, loc,is_my_turn)
 
     is_white = chesshelper.square_color(loc)
 
-    im1_cat = colorfilter.catalogue_colors(im1_square, is_white)
-    im2_cat = colorfilter.catalogue_colors(im2_square, is_white)
     im1_cat_show = colorfilter.catalogue_colors_show(im1_square, is_white)
     im2_cat_show = colorfilter.catalogue_colors_show(im2_square, is_white)
 
     scipy.misc.imsave('cat1.JPEG', im1_cat_show)
     scipy.misc.imsave('cat2.JPEG', im2_cat_show)
-    diff_im = colorfilter.make_binary_relevant_diff_im(im1_cat, im2_cat,
-                                                       is_white)
-    scipy.misc.imsave('cat_diff.JPEG', diff_im)
     scipy.misc.imsave('im1_square.JPEG', im1_square)
     scipy.misc.imsave('im2_square.JPEG', im2_square)
     square_diff = colorfilter.get_square_diff(im2,loc)
     scipy.misc.imsave('square_diff.JPEG', square_diff)
     return
 
-
-#tester('main_im_b.jpg', 'im1_b.jpg', 'im2_b.jpg', True, False)
-tester2('main_im_b.jpg', 'im1_b.jpg', 'im2_b.jpg', True, 'g1')
+tester('main_im_b.jpg', 'im1_b.jpg', 'im2_b.jpg', True, 'g1')
